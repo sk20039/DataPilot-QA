@@ -20,6 +20,7 @@ dependencies = [
 [project.optional-dependencies]
 snowflake = ["snowflake-connector-python>=3.0"]
 oracle = ["oracledb>=2.0"]
+mysql = ["PyMySQL>=1.1"]
 ai = ["anthropic>=0.40.0"]
 dev = [
     "pytest>=8.0",

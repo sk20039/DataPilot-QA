@@ -17,4 +17,7 @@ def get_connector(config: ConnectionConfig) -> Connector:
     if dialect == "oracle":
         from datamigrate_qa.connectors.oracle import OracleConnector
         return OracleConnector(config)  # type: ignore[return-value]
+    if dialect in ("mysql", "mariadb"):
+        from datamigrate_qa.connectors.mysql import MySQLConnector
+        return MySQLConnector(config)  # type: ignore[return-value]
     raise ValueError(f"Unsupported dialect: {config.dialect!r}")

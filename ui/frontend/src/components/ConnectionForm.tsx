@@ -2,6 +2,7 @@ import type { ConnectionConfig, ConnectionTestResult } from '../types'
 
 const DIALECTS = [
   { value: 'postgresql', label: 'PostgreSQL', defaultPort: 5432 },
+  { value: 'mysql', label: 'MySQL', defaultPort: 3306 },
   { value: 'snowflake', label: 'Snowflake', defaultPort: 443 },
   { value: 'oracle', label: 'Oracle', defaultPort: 1521 },
 ]
@@ -99,10 +100,10 @@ export default function ConnectionForm({ label, value, onChange, onTest, testing
       </div>
 
       <Field
-        label="Schema (optional)"
+        label={value.dialect === 'mysql' ? 'Schema / Database name' : 'Schema (optional)'}
         value={value.schema_name}
         onChange={(v) => set({ schema_name: v })}
-        placeholder="public"
+        placeholder={value.dialect === 'mysql' ? value.database || 'my_database' : 'public'}
       />
 
       {/* Test button + result */}

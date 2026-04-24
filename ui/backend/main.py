@@ -258,7 +258,13 @@ async def test_connection(conn: ConnectionRequest) -> dict[str, Any]:
         cfg = _build_conn_cfg(conn)
         connector = get_connector(cfg)
         connector.connect()
-        _default_schema = {"postgresql": "public", "snowflake": "PUBLIC", "oracle": conn.username.upper()}
+        _default_schema = {
+            "postgresql": "public",
+            "snowflake": "PUBLIC",
+            "oracle": conn.username.upper(),
+            "mysql": conn.database,
+            "mariadb": conn.database,
+        }
         schema = conn.schema_name or _default_schema.get(conn.dialect, "public")
         tables = connector.list_tables(schema)
         connector.disconnect()

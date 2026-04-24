@@ -153,6 +153,7 @@ datamigrate-qa generate-test --config config.yaml \
 | Database | Dialect string | Extra |
 |---|---|---|
 | PostgreSQL | `postgresql` | included |
+| MySQL / MariaDB | `mysql` / `mariadb` | `pip install -e ".[mysql]"` |
 | Snowflake | `snowflake` | `pip install -e ".[snowflake]"` |
 | Oracle | `oracle` | `pip install -e ".[oracle]"` |
 

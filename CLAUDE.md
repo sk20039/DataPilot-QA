@@ -109,7 +109,7 @@ The pipeline flows: **Config → Connectors → Introspection → Mapping → Ge
 
 **Config** (`src/datamigrate_qa/config/`): Pydantic v2 models loaded from YAML. Supports `${ENV_VAR}` substitution and secret file references. `AppConfig` is the root model containing source/target `ConnectionConfig`, table list, and generator options.
 
-**Connectors** (`src/datamigrate_qa/connectors/`): All connectors implement the `Connector` Protocol in `base.py`. The `ConnectorRegistry` in `registry.py` maps dialect strings to implementations. Snowflake and Oracle are optional imports — they raise `ImportError` with install hints if the extras aren't installed.
+**Connectors** (`src/datamigrate_qa/connectors/`): All connectors implement the `Connector` Protocol in `base.py`. The `ConnectorRegistry` in `registry.py` maps dialect strings to implementations. MySQL (`mysql`/`mariadb`), Snowflake, and Oracle are optional imports — they raise `ImportError` with install hints if the extras aren't installed. In MySQL, schema = database name; the connector uses `DictCursor` throughout and strips type display widths (e.g. `int(11)` → `int`) before mapping to `CanonicalType`.
 
 **Mapping** (`src/datamigrate_qa/mapping/`): Auto-mapper does two-pass matching (exact → case-insensitive). YAML mapper allows manual column overrides. Unmatched columns generate warnings, not errors.
 
