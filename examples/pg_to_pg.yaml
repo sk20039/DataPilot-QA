@@ -1,0 +1,38 @@
+source:
+  dialect: postgresql
+  host: localhost
+  port: 5432
+  database: source_db
+  username: postgres
+  password: postgres
+
+target:
+  dialect: postgresql
+  host: localhost
+  port: 5433
+  database: target_db
+  username: postgres
+  password: postgres
+
+tables:
+  - source: public.orders
+    target: public.orders
+  - source: public.customers
+    target: public.customers
+
+generators:
+  row_count:
+    enabled: true
+  schema:
+    enabled: true
+  field_match:
+    enabled: true
+  null_duplicate:
+    enabled: true
+  aggregate_recon:
+    enabled: true
+    tolerance: 1.0e-6
+
+output:
+  json: report.json
+  html: report.html
