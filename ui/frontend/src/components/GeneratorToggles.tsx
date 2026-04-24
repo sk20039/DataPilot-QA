@@ -36,6 +36,12 @@ const GENERATORS: {
     description: 'Compares SUM, AVG, and COUNT aggregates for numeric columns.',
     hasTolerance: true,
   },
+  {
+    key: 'missing_rows',
+    name: 'Missing Row Detection',
+    description: 'Identifies which primary key values are missing in the target. Shows exact IDs.',
+    hasTolerance: false,
+  },
 ]
 
 interface Props {

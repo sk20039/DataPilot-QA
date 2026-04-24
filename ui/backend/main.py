@@ -55,6 +55,7 @@ class GeneratorsRequest(BaseModel):
     field_match: GeneratorSetting = Field(default_factory=GeneratorSetting)
     null_duplicate: GeneratorSetting = Field(default_factory=GeneratorSetting)
     aggregate_recon: GeneratorSetting = Field(default_factory=GeneratorSetting)
+    missing_rows: GeneratorSetting = Field(default_factory=lambda: GeneratorSetting(enabled=False))
 
 
 class CustomTestRequest(BaseModel):
@@ -131,6 +132,7 @@ def _run_validation(run_id: str, req: RunRequest) -> None:
     from datamigrate_qa.generators.field_match import FieldMatchGenerator
     from datamigrate_qa.generators.null_duplicate import NullDuplicateGenerator
     from datamigrate_qa.generators.aggregate_recon import AggregateReconGenerator
+    from datamigrate_qa.generators.missing_rows import MissingRowsGenerator
     from datamigrate_qa.generators.base import GeneratorConfig
     from datamigrate_qa.executor.runner import SequentialRunner
     from datamigrate_qa.executor.parallel import ParallelRunner
@@ -188,6 +190,8 @@ def _run_validation(run_id: str, req: RunRequest) -> None:
                 generators.append((NullDuplicateGenerator(), DQGeneratorOptions(enabled=True)))
             if g.aggregate_recon.enabled:
                 generators.append((AggregateReconGenerator(), DQGeneratorOptions(enabled=True, tolerance=g.aggregate_recon.tolerance)))
+            if g.missing_rows.enabled:
+                generators.append((MissingRowsGenerator(), DQGeneratorOptions(enabled=True)))
 
             all_cases = []
             for gen, opts in generators:

@@ -68,6 +68,9 @@ class SequentialRunner:
 
     def _run_one(self, test_case: TestCase) -> TestResult:
         """Execute a single test case."""
+        if test_case.category == "missing_rows":
+            return self._run_missing_rows(test_case)
+
         start = time.monotonic()
         try:
             source_value = self._source.execute_scalar(test_case.source_sql)
@@ -89,6 +92,87 @@ class SequentialRunner:
             )
         except Exception as exc:
             logger.exception("Error executing test case %s", test_case.id)
+            return TestResult(
+                test_case=test_case,
+                status=TestStatus.ERROR,
+                error_message=str(exc),
+                duration_seconds=time.monotonic() - start,
+            )
+
+    def _run_missing_rows(self, test_case: TestCase) -> TestResult:
+        """Fetch PKs from both sides, diff in Python, report missing IDs."""
+        MAX_ROWS = 10_000
+        SAMPLE_SIZE = 100
+        start = time.monotonic()
+        try:
+            src_keys: set[tuple[object, ...]] = set()
+            for chunk in self._source.execute_query(test_case.source_sql):
+                for row in chunk:
+                    src_keys.add(tuple(row.values()))
+                    if len(src_keys) >= MAX_ROWS:
+                        break
+                if len(src_keys) >= MAX_ROWS:
+                    break
+
+            tgt_keys: set[tuple[object, ...]] = set()
+            for chunk in self._target.execute_query(test_case.target_sql):
+                for row in chunk:
+                    tgt_keys.add(tuple(row.values()))
+                    if len(tgt_keys) >= MAX_ROWS:
+                        break
+                if len(tgt_keys) >= MAX_ROWS:
+                    break
+
+            missing_in_target = src_keys - tgt_keys
+            extra_in_target = tgt_keys - src_keys
+
+            if not missing_in_target and not extra_in_target:
+                return TestResult(
+                    test_case=test_case,
+                    status=TestStatus.PASS,
+                    source_value=len(src_keys),
+                    target_value=len(tgt_keys),
+                    duration_seconds=time.monotonic() - start,
+                )
+
+            diff_parts: list[str] = []
+            if missing_in_target:
+                sample = sorted(missing_in_target)[:SAMPLE_SIZE]
+                ids = ", ".join(
+                    str(pk[0]) if len(pk) == 1 else str(pk) for pk in sample
+                )
+                diff_parts.append(
+                    f"{len(missing_in_target)} rows in source missing from target"
+                    f"{' (showing first 100)' if len(missing_in_target) > SAMPLE_SIZE else ''}."
+                )
+                diff_parts.append(f"Missing IDs in target: {ids}")
+
+            if extra_in_target:
+                sample = sorted(extra_in_target)[:SAMPLE_SIZE]
+                ids = ", ".join(
+                    str(pk[0]) if len(pk) == 1 else str(pk) for pk in sample
+                )
+                diff_parts.append(
+                    f"{len(extra_in_target)} rows in target not in source"
+                    f"{' (showing first 100)' if len(extra_in_target) > SAMPLE_SIZE else ''}."
+                )
+                diff_parts.append(f"Extra IDs in target: {ids}")
+
+            if len(src_keys) >= MAX_ROWS or len(tgt_keys) >= MAX_ROWS:
+                diff_parts.append(
+                    f"(Comparison capped at {MAX_ROWS:,} rows per side — full table scan may show more)"
+                )
+
+            return TestResult(
+                test_case=test_case,
+                status=TestStatus.FAIL,
+                source_value=len(src_keys),
+                target_value=len(tgt_keys),
+                diff="\n".join(diff_parts),
+                duration_seconds=time.monotonic() - start,
+            )
+        except Exception as exc:
+            logger.exception("Error in missing-rows check %s", test_case.id)
             return TestResult(
                 test_case=test_case,
                 status=TestStatus.ERROR,

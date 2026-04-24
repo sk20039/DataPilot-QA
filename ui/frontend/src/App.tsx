@@ -32,6 +32,7 @@ const defaultGenerators = (): GeneratorsConfig => ({
   field_match: { enabled: false, tolerance: 1e-6 },
   null_duplicate: { enabled: true, tolerance: 1e-6 },
   aggregate_recon: { enabled: true, tolerance: 1e-6 },
+  missing_rows: { enabled: false, tolerance: 1e-6 },
 })
 
 type RunPhase = 'idle' | 'running' | 'completed' | 'error'

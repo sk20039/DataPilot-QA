@@ -26,6 +26,7 @@ export interface GeneratorsConfig {
   field_match: GeneratorSetting
   null_duplicate: GeneratorSetting
   aggregate_recon: GeneratorSetting
+  missing_rows: GeneratorSetting
 }
 
 export interface TestResultItem {
