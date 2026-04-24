@@ -12,18 +12,21 @@ The UI lives in `ui/`. It wraps the core engine in a FastAPI backend and exposes
 
 ```
 ui/
-  backend/main.py        # FastAPI app — /api/connections/test, /api/runs
+  backend/main.py        # FastAPI app — /api/connections/test, /api/runs, /api/ai/*
   backend/requirements.txt
   frontend/              # React + Vite + Tailwind + TypeScript
     src/
       App.tsx            # Main state + layout
-      api.ts             # fetch wrappers
-      types.ts           # shared TypeScript types
+      api.ts             # fetch wrappers (including AI endpoints)
+      types.ts           # shared TypeScript types (including AI response types)
       components/
         ConnectionForm.tsx     # dialect-aware connection form with test button
         TableManager.tsx       # add/remove source→target table pairs
         GeneratorToggles.tsx   # enable/disable each check type
-        ResultsDashboard.tsx   # summary cards + filterable results table
+        ResultsDashboard.tsx   # summary cards + filterable results table + AI buttons
+        CustomTestEditor.tsx   # custom SQL test cases + AI generator
+        AISummaryPanel.tsx     # run-level AI health report card
+        AITestGenerator.tsx    # natural language → SQL input panel
   start.ps1              # launches both servers and opens browser (Windows)
 ```
 
@@ -31,7 +34,7 @@ ui/
 
 ```bash
 # 1. Install backend extras (once)
-pip install -e .
+pip install -e ".[ai]"
 pip install -r ui/backend/requirements.txt
 
 # 2. Install frontend deps (once)
@@ -42,7 +45,9 @@ cd ui/frontend && npm install
 
 # 3b. Or start manually in two terminals:
 #   Terminal 1 — backend (from repo root):
-uvicorn ui.backend.main:app --reload --port 8000
+#   Set API key first if using AI features:
+#   $env:ANTHROPIC_API_KEY = "sk-ant-..."
+python -m uvicorn ui.backend.main:app --reload --port 8000
 #   Terminal 2 — frontend:
 cd ui/frontend && npm run dev
 
@@ -58,6 +63,8 @@ The Vite dev server proxies `/api/*` to `http://localhost:8000`. In production, 
 - `schema_check` in the API maps to `SchemaValidatorGenerator` (named differently to avoid Python keyword conflicts).
 - Field Match is disabled by default in the UI (can be slow for large tables).
 - `max_workers > 1` uses `ParallelRunner(AppConfig(...), max_workers=N)`; `max_workers == 1` uses `SequentialRunner`. `ParallelRunner` creates fresh per-worker DB connections internally.
+- AI endpoints (`/api/ai/*`) return HTTP 503 if `ANTHROPIC_API_KEY` is not set or `anthropic` package is not installed — they never crash the server.
+- Run state stores `source_dialect` and `target_dialect` so AI analysis has migration context.
 
 ## Commands
 
@@ -65,9 +72,21 @@ The Vite dev server proxies `/api/*` to `http://localhost:8000`. In production, 
 # Install for development
 pip install -e ".[dev]"
 
+# Install AI features (requires ANTHROPIC_API_KEY env var)
+pip install -e ".[ai]"
+
 # Run the tool
 datamigrate-qa run --config examples/pg_to_pg.yaml
 datamigrate-qa run --config config.yaml --workers 4 --verbose
+datamigrate-qa run --config config.yaml --ai          # with AI summary + failure analysis
+
+# Analyze an existing JSON report with AI
+datamigrate-qa analyze --report report.json
+
+# Generate a custom test case from natural language
+datamigrate-qa generate-test --config config.yaml \
+  --prompt "ensure revenue totals match within 1%" \
+  --table orders
 
 # Testing
 pytest tests/                         # all tests
@@ -98,7 +117,13 @@ The pipeline flows: **Config → Connectors → Introspection → Mapping → Ge
 
 **Executor** (`src/datamigrate_qa/executor/`): `SequentialRunner` is the default; `ParallelRunner` uses `ThreadPoolExecutor` with per-worker DB connections (connections are not thread-safe). Comparison strategies: `EXACT`, `NUMERIC_TOLERANCE`, `SET_EQUALITY`, `HASH_MATCH`.
 
-**Reporting** (`src/datamigrate_qa/reporting/`): Three reporters — Rich console tables, JSON file, HTML file (via Jinja2). All receive a `RunReport` dataclass.
+**Reporting** (`src/datamigrate_qa/reporting/`): Three reporters — Rich console tables, JSON file, HTML file (via Jinja2). All receive a `RunReport` dataclass. `print_ai_section()` appends AI analysis to the console output when `--ai` is active.
+
+**AI** (`src/datamigrate_qa/ai/`): Optional module — requires `pip install -e ".[ai]"` and `ANTHROPIC_API_KEY`.
+- `client.py`: soft import of `anthropic`; `get_client()` / `is_available()`.
+- `analyst.py`: batch failure analysis via `claude-haiku-4-5`; single API call for all FAIL/ERROR results.
+- `summarizer.py`: executive run summary + risk score via `claude-haiku-4-5`.
+- `nl_generator.py`: natural language → SQL via `claude-sonnet-4-6`; detects numeric/date/PK/FK columns from `SchemaContext` to write smarter SQL; validates generated SQL is read-only before returning.
 
 ### Core Models (`src/datamigrate_qa/models.py`)
 
@@ -115,3 +140,5 @@ The pipeline flows: **Config → Connectors → Introspection → Mapping → Ge
 - `execute_query()` returns an iterator for chunked large result sets
 - CLI uses lazy imports inside the `run()` command function for fast startup
 - Ruff line-length is 100; mypy strict mode is enforced
+- AI module uses soft imports — missing `anthropic` package degrades gracefully with a clear message, never crashes the core tool
+- AI prompts instruct Claude to respond with raw JSON only; markdown fences are stripped before `json.loads()` as a safety net
