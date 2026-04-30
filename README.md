@@ -1,7 +1,22 @@
 # DataPilot QA
 
-Automated data validation tool for database migrations. Validates data integrity between source and target databases across PostgreSQL, Snowflake, MySQL and Oracle — with a web UI and optional AI-powered analysis.
+DataPilot QA is a migration validation tool designed for Quality Engineering teams to verify data integrity between source and target databases during migrations.
 
+Instead of relying on manual SQL spot checks, DataPilot QA runs structured reconciliation tests across multiple validation layers including schema comparison, aggregate checks, duplicate detection, and primary key based missing row analysis.
+
+Supports:
+
+PostgreSQL
+Snowflake
+MySQL
+Oracle
+
+Includes:
+
+CLI workflow
+Web UI built with FastAPI and React
+Parallel execution support
+Optional AI powered migration health analysis
 ![Python](https://img.shields.io/badge/python-3.11+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
