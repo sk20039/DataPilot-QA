@@ -1,6 +1,6 @@
-# datamigrate-qa
+# DataPilot QA
 
-Automated data validation tool for database migrations. Validates data integrity between source and target databases across PostgreSQL, Snowflake, MySql and Oracle — with a web UI and optional AI-powered analysis.
+Automated data validation tool for database migrations. Validates data integrity between source and target databases across PostgreSQL, Snowflake, MySQL and Oracle — with a web UI and optional AI-powered analysis.
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -8,7 +8,7 @@ Automated data validation tool for database migrations. Validates data integrity
 
 ## What it does
 
-When migrating data between databases, datamigrate-qa runs a battery of checks to confirm nothing was lost, corrupted, or changed:
+When migrating data between databases, datapilot-qa runs a battery of checks to confirm nothing was lost, corrupted, or changed:
 
 | Check | What it validates |
 |---|---|
@@ -44,8 +44,8 @@ Requires `ANTHROPIC_API_KEY` and `pip install -e ".[ai]"`.
 ### Install
 
 ```bash
-git clone https://github.com/sk20039/datamigrate-qa.git
-cd datamigrate-qa
+git clone https://github.com/sk20039/datapilot-qa.git
+cd datapilot-qa
 
 # Core tool
 pip install -e .
@@ -63,9 +63,9 @@ cd ui/frontend && npm install && cd ../..
 # Copy and edit the example config
 cp examples/pg_to_pg.yaml config.yaml
 
-datamigrate-qa run --config config.yaml
-datamigrate-qa run --config config.yaml --ai        # with AI summary
-datamigrate-qa run --config config.yaml --workers 4 --verbose
+datapilot-qa run --config config.yaml
+datapilot-qa run --config config.yaml --ai        # with AI summary
+datapilot-qa run --config config.yaml --workers 4 --verbose
 ```
 
 ### Run via Web UI
@@ -140,13 +140,13 @@ Supports `${ENV_VAR}` substitution and file-based secrets anywhere in the config
 
 ```bash
 # Run validation
-datamigrate-qa run --config config.yaml [--workers N] [--verbose] [--ai]
+datapilot-qa run --config config.yaml [--workers N] [--verbose] [--ai]
 
 # Analyze a saved JSON report with AI
-datamigrate-qa analyze --report report.json
+datapilot-qa analyze --report report.json
 
 # Generate a custom test case from natural language
-datamigrate-qa generate-test --config config.yaml \
+datapilot-qa generate-test --config config.yaml \
   --prompt "ensure revenue totals match within 1%" \
   --table orders
 ```

@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "datamigrate-qa"
+name = "datapilot-qa"
 version = "0.1.0"
-description = "Automated data migration QA tool"
+description = "DataPilot QA — automated data migration validation tool"
 requires-python = ">=3.11"
 dependencies = [
     "typer>=0.12",
@@ -31,7 +31,7 @@ dev = [
 ]
 
 [project.scripts]
-datamigrate-qa = "datamigrate_qa.cli:app"
+datapilot-qa = "datamigrate_qa.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/datamigrate_qa"]

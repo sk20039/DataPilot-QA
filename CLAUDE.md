@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**datamigrate-qa** is a Python tool that validates data integrity between source and target databases during migrations. It supports PostgreSQL, Snowflake, and Oracle via a protocol-based connector system. It has both a CLI (`datamigrate-qa run`) and a web UI (`ui/`).
+**DataPilot QA** is a Python tool that validates data integrity between source and target databases during migrations. It supports PostgreSQL, Snowflake, and Oracle via a protocol-based connector system. It has both a CLI (`datapilot-qa run`) and a web UI (`ui/`).
 
 ## Web UI (FastAPI + React)
 
@@ -76,15 +76,15 @@ pip install -e ".[dev]"
 pip install -e ".[ai]"
 
 # Run the tool
-datamigrate-qa run --config examples/pg_to_pg.yaml
-datamigrate-qa run --config config.yaml --workers 4 --verbose
-datamigrate-qa run --config config.yaml --ai          # with AI summary + failure analysis
+datapilot-qa run --config examples/pg_to_pg.yaml
+datapilot-qa run --config config.yaml --workers 4 --verbose
+datapilot-qa run --config config.yaml --ai          # with AI summary + failure analysis
 
 # Analyze an existing JSON report with AI
-datamigrate-qa analyze --report report.json
+datapilot-qa analyze --report report.json
 
 # Generate a custom test case from natural language
-datamigrate-qa generate-test --config config.yaml \
+datapilot-qa generate-test --config config.yaml \
   --prompt "ensure revenue totals match within 1%" \
   --table orders
 

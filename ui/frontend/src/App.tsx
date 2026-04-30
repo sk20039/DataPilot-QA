@@ -147,7 +147,7 @@ export default function App() {
       <header className="bg-slate-800 text-white px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">DataMigrate QA</h1>
+            <h1 className="text-lg font-semibold tracking-tight">DataPilot QA</h1>
             <p className="text-slate-400 text-xs mt-0.5">Automated data validation between source and target databases</p>
           </div>
           {phase !== 'idle' && (
