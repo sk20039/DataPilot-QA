@@ -129,6 +129,7 @@ class SnowflakeConnector:
             return row[0] if row else None
 
     def execute_query(self, sql: str, chunk_size: int = 10_000) -> Iterator[list[dict[str, Any]]]:
+        import snowflake.connector
         with self._conn.cursor(snowflake.connector.DictCursor) as cur:
             cur.execute(sql)
             while True:
