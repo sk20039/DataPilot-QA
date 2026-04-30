@@ -1,6 +1,6 @@
 # datamigrate-qa
 
-Automated data validation tool for database migrations. Validates data integrity between source and target databases across PostgreSQL, Snowflake, and Oracle — with a web UI and optional AI-powered analysis.
+Automated data validation tool for database migrations. Validates data integrity between source and target databases across PostgreSQL, Snowflake, MySql and Oracle — with a web UI and optional AI-powered analysis.
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -17,6 +17,7 @@ When migrating data between databases, datamigrate-qa runs a battery of checks t
 | **Null / Duplicate** | No unexpected nulls introduced; no duplicate primary keys |
 | **Field Match** | Sampled field values match between source and target |
 | **Aggregate Recon** | SUM, AVG, MIN, MAX of numeric columns reconcile |
+| **Missing Rows** | Which specific primary key values are in source but not target (and vice versa) |
 
 Results are reported as PASS / FAIL / ERROR / SKIPPED with diffs for every failure.
 
@@ -38,7 +39,7 @@ Requires `ANTHROPIC_API_KEY` and `pip install -e ".[ai]"`.
 
 - Python 3.11+
 - Node.js 18+ (for the web UI)
-- A source and target database (PostgreSQL, Snowflake, or Oracle)
+- A source and target database (PostgreSQL, Snowflake, MySQL/MariaDB, or Oracle)
 
 ### Install
 
@@ -114,6 +115,7 @@ tables:
     target: public.orders
   - source: public.customers
     target: public.customers
+    primary_key_override: [id]   # optional — override auto-detected PK
 
 generators:
   row_count:    { enabled: true }
@@ -121,6 +123,9 @@ generators:
   null_duplicate: { enabled: true }
   aggregate_recon: { enabled: true, tolerance: 1e-6 }
   field_match:  { enabled: false }   # slow on large tables
+  missing_rows: { enabled: false }   # identifies specific missing PKs; requires a PK
+
+max_workers: 4   # parallel workers (1 = sequential)
 
 output:
   json: report.json
@@ -168,7 +173,7 @@ src/datamigrate_qa/
   connectors/       # DB connectors (Protocol-based)
   introspection/    # Schema inspector
   mapping/          # Auto-mapper + YAML overrides
-  generators/       # 5 test case generators
+  generators/       # 6 test case generators
   executor/         # Sequential + parallel runners
   reporting/        # Console (Rich), JSON, HTML reporters
   cli.py            # Typer CLI entry point

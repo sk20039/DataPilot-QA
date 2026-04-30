@@ -113,7 +113,7 @@ The pipeline flows: **Config → Connectors → Introspection → Mapping → Ge
 
 **Mapping** (`src/datamigrate_qa/mapping/`): Auto-mapper does two-pass matching (exact → case-insensitive). YAML mapper allows manual column overrides. Unmatched columns generate warnings, not errors.
 
-**Generators** (`src/datamigrate_qa/generators/`): Each implements the `TestGenerator` Protocol and produces `TestCase` objects. The 5 generators are: `row_count`, `schema_validator`, `field_match`, `null_duplicate`, `aggregate_recon`. Each is independently enabled/disabled in config.
+**Generators** (`src/datamigrate_qa/generators/`): Each implements the `TestGenerator` Protocol and produces `TestCase` objects. The 6 generators are: `row_count`, `schema_validator`, `field_match`, `null_duplicate`, `aggregate_recon`, `missing_rows`. Each is independently enabled/disabled in config. Note: `missing_rows` fetches PKs from both sides, diffs in Python, and reports exact missing/extra IDs (capped at 10,000 rows per side). It only runs on tables with a detected or overridden PK, and is disabled by default. **It is not yet in `GeneratorsConfig` (`config/models.py`), so it cannot be enabled via YAML/CLI — only via the UI (`GeneratorsRequest` in `ui/backend/main.py`).**
 
 **Executor** (`src/datamigrate_qa/executor/`): `SequentialRunner` is the default; `ParallelRunner` uses `ThreadPoolExecutor` with per-worker DB connections (connections are not thread-safe). Comparison strategies: `EXACT`, `NUMERIC_TOLERANCE`, `SET_EQUALITY`, `HASH_MATCH`.
 
@@ -121,7 +121,7 @@ The pipeline flows: **Config → Connectors → Introspection → Mapping → Ge
 
 **AI** (`src/datamigrate_qa/ai/`): Optional module — requires `pip install -e ".[ai]"` and `ANTHROPIC_API_KEY`.
 - `client.py`: soft import of `anthropic`; `get_client()` / `is_available()`.
-- `analyst.py`: batch failure analysis via `claude-haiku-4-5`; single API call for all FAIL/ERROR results.
+- `analyst.py`: batch failure analysis via `claude-haiku-4-5`; single API call for all FAIL/ERROR results. Also exposes `analyze_one()` for single-result explanation, used by the `/api/ai/explain-result` endpoint.
 - `summarizer.py`: executive run summary + risk score via `claude-haiku-4-5`.
 - `nl_generator.py`: natural language → SQL via `claude-sonnet-4-6`; detects numeric/date/PK/FK columns from `SchemaContext` to write smarter SQL; validates generated SQL is read-only before returning.
 
