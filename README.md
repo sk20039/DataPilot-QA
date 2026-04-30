@@ -1,3 +1,5 @@
+![Release](https://img.shields.io/github/v/release/sk20039/datapilot-qa)
+
 # DataPilot QA
 
 DataPilot QA is a migration validation tool designed for Quality Engineering teams to verify data integrity between source and target databases during migrations.
