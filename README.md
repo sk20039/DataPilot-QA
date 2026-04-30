@@ -17,6 +17,7 @@ CLI workflow
 Web UI built with FastAPI and React
 Parallel execution support
 Optional AI powered migration health analysis
+
 ![Python](https://img.shields.io/badge/python-3.11+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
