@@ -21,6 +21,14 @@ Optional AI powered migration health analysis
 ![Python](https://img.shields.io/badge/python-3.11+-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
+## Why I Built DataPilot QA
+
+Database migrations are often validated using one off scripts and manual sampling. This creates risk because subtle issues like schema drift, duplicate keys, or aggregate mismatches can go unnoticed.
+
+I built DataPilot QA to make migration validation structured, repeatable, and scalable for QA workflows.
+
+This project is part of a growing automation toolkit alongside APILot, an AI assisted API testing workflow companion.
+---
 
 ## What it does
 
